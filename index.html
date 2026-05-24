@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SNIPPIT AI</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, Arial;
+  background: radial-gradient(circle at top, #0f172a, #05070f);
+  color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+header {
+  padding: 16px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+}
+
+/* CHAT */
+#chat {
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* MESSAGE */
+.msg {
+  max-width: 75%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* USER */
+.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+/* AI */
+.ai {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* INPUT */
+#inputArea {
+  display: flex;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.06);
+  color: white;
+}
+
+button {
+  margin-left: 10px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  font-weight: bold;
+  color: white;
+}
+
+/* TYPING */
+.typing {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<header>SNIPPIT AI</header>
+
+<div id="chat"></div>
+
+<div id="inputArea">
+  <input id="input" placeholder="Message SNIPPIT..." />
+  <button onclick="send()">Send</button>
+</div>
+
+<script>
+let memory = []; // 🧠 chat memory
+
+function time(){
+  let d = new Date();
+  return d.getHours() + ":" + String(d.getMinutes()).padStart(2,'0');
+}
+
+function addMsg(text, type){
+  let div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text + "\n" + time();
+  document.getElementById("chat").appendChild(div);
+  div.scrollIntoView({behavior:"smooth"});
+}
+
+function send(){
+  let input = document.getElementById("input");
+  let text = input.value;
+  if(!text) return;
+
+  addMsg(text, "user");
+  memory.push("User: " + text);
+
+  // typing effect
+  let typing = document.createElement("div");
+  typing.className = "msg ai typing";
+  typing.innerText = "SNIPPIT is typing...";
+  document.getElementById("chat").appendChild(typing);
+
+  setTimeout(() => {
+    typing.remove();
+
+    let reply = getReply(text.toLowerCase());
+
+    addMsg(reply, "ai");
+    memory.push("AI: " + reply);
+  }, 900);
+
+  input.value = "";
+}
+
+function getReply(t){
+
+  // simple smart logic + memory awareness
+  if(t.includes("hello")) return "Hello 👋 I’m SNIPPIT AI.";
+  if(t.includes("how are you")) return "I’m running smoothly. What about you?";
+  if(t.includes("school")) return "Stay consistent — success comes from discipline 📚";
+  if(t.includes("ai")) return "AI simulates human thinking using data 🤖";
+  if(t.includes("business")) return "Start small, solve problems, scale later 💡";
+
+  if(memory.length > 6){
+    return "I remember our conversation — keep building on it 💭";
+  }
+
+  return "I understand: " + t;
+}
+</script>
+
+</body>
+</html>
+     
