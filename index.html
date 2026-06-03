@@ -87,17 +87,29 @@ button {
 const chat = document.getElementById("chat");
 
 function send() {
+  async function send() {
   const input = document.getElementById("text");
   const msg = input.value.trim();
-
   if (!msg) return;
 
   addMsg(msg, "user");
   input.value = "";
 
-  setTimeout(() => {
-    addMsg("AI not connected yet.", "ai");
-  }, 500);
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg })
+    });
+
+    const data = await res.json();
+
+    addMsg(data.reply || "No response from AI", "ai");
+
+  } catch (error) {
+    addMsg("Error connecting to AI", "ai");
+  }
+}
 }
 
 function addMsg(text, type) {
