@@ -1,3 +1,5 @@
+console.log("SCRIPT IS LOADED ✅");
+
 let user = {};
 let chats = [];
 let currentChat = null;
@@ -37,7 +39,9 @@ function createNewChat() {
 
 // ---------------- SEND MESSAGE ----------------
 function sendMessage() {
-  const input = document.getElementById("text"); // your HTML input id
+  console.log("SEND CLICKED ✅");
+
+  const input = document.getElementById("text");
   const message = input.value.trim();
 
   if (!message) return;
@@ -45,7 +49,6 @@ function sendMessage() {
   const chat = chats.find(c => c.id === currentChat);
   if (!chat) return;
 
-  // add user message
   chat.messages.push({
     role: "user",
     text: message
@@ -53,9 +56,9 @@ function sendMessage() {
 
   input.value = "";
   renderChat();
+
   showTyping();
 
-  // call backend
   fetch("/api/chat", {
     method: "POST",
     headers: {
@@ -79,13 +82,15 @@ function sendMessage() {
     })
     .catch(err => {
       hideTyping();
-      console.error("Error:", err);
+      console.error("ERROR:", err);
     });
 }
 
 // ---------------- RENDER CHAT ----------------
 function renderChat() {
   const box = document.getElementById("chatBox");
+  if (!box) return;
+
   box.innerHTML = "";
 
   const chat = chats.find(c => c.id === currentChat);
@@ -111,7 +116,6 @@ function renderChatList() {
   chats.forEach(chat => {
     const div = document.createElement("div");
     div.className = "chatItem";
-
     div.innerText = "Chat " + new Date(chat.id).toLocaleTimeString();
 
     div.onclick = () => {
@@ -123,12 +127,17 @@ function renderChatList() {
   });
 }
 
-// ---------------- BUTTON CONNECT ----------------
+// ---------------- BUTTON FIX (IMPORTANT) ----------------
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("sendBtn");
-  if (btn) {
-    btn.addEventListener("click", sendMessage);
+
+  if (!btn) {
+    console.log("SEND BUTTON NOT FOUND ❌");
+    return;
   }
+
+  btn.addEventListener("click", sendMessage);
+  console.log("SEND BUTTON CONNECTED ✅");
 });
 
 // ---------------- TYPING ----------------
@@ -147,19 +156,4 @@ function showTyping() {
 function hideTyping() {
   const typing = document.getElementById("typing");
   if (typing) typing.remove();
-}
-
-// ---------------- OPTIONAL AI FALLBACK ----------------
-function generateAIResponse(text) {
-  text = text.toLowerCase();
-
-  if (text.includes("hello") || text.includes("hi")) {
-    return "Hello 👋 I'm SNIPPIT AI";
-  }
-
-  if (text.includes("name")) {
-    return "I'm SNIPPIT AI";
-  }
-
-  return "Working on smarter responses...";
 }
