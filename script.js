@@ -1,11 +1,11 @@
 let user = {};
 let chats = [];
-let currentChat = 0;
+let currentChat = null;
 
-// LOGIN
+// ---------------- LOGIN ----------------
 function login() {
-  let name = document.getElementById("name").value;
-  let age = document.getElementById("age").value;
+  const name = document.getElementById("name").value;
+  const age = document.getElementById("age").value;
 
   if (!name || !age) {
     alert("Fill name and age");
@@ -20,93 +20,124 @@ function login() {
   createNewChat();
 }
 
-// CREATE NEW CHAT
+// ---------------- CREATE CHAT ----------------
 function createNewChat() {
-  let chat = { id: Date.now(), messages: [], pinned: false };
+  const chat = {
+    id: Date.now(),
+    messages: [],
+    pinned: false
+  };
+
   chats.push(chat);
   currentChat = chat.id;
+
   renderChatList();
   renderChat();
 }
 
-// SEND MESSAGE
-fetch("http://localhost:3000/chat", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    message: input.value
-  })
-})
-.then(res => res.json())
-.then(data => {
-  let chat = chats.find(c => c.id === currentChat);
+// ---------------- SEND MESSAGE ----------------
+function sendMessage() {
+  const input = document.getElementById("text"); // your HTML input id
+  const message = input.value.trim();
 
+  if (!message) return;
+
+  const chat = chats.find(c => c.id === currentChat);
+  if (!chat) return;
+
+  // add user message
   chat.messages.push({
-    role: "bot",
-    text: data.reply
+    role: "user",
+    text: message
   });
 
-  saveChats();
+  input.value = "";
   renderChat();
-  renderChatList();
-});
-}
-    };
+  showTyping();
 
-    // menu actions
-    div.querySelector(".menu").onclick = (e) => {
-      e.stopPropagation();
+  // call backend
+  fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: message
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      hideTyping();
 
-      let action = prompt("Type: pin / delete / share");
+      chat.messages.push({
+        role: "bot",
+        text: data.reply
+      });
 
-      if (action === "delete") {
-        chats = chats.filter(c => c.id !== chat.id);
-        createNewChat();
-      }
-
-      if (action === "pin") {
-        chat.pinned = !chat.pinned;
-      }
-
-      if (action === "share") {
-        navigator.share?.({
-          text: chat.messages.map(m => m.text).join("\n")
-        });
-      }
-
+      renderChat();
       renderChatList();
+    })
+    .catch(err => {
+      hideTyping();
+      console.error("Error:", err);
+    });
+}
+
+// ---------------- RENDER CHAT ----------------
+function renderChat() {
+  const box = document.getElementById("chatBox");
+  box.innerHTML = "";
+
+  const chat = chats.find(c => c.id === currentChat);
+  if (!chat) return;
+
+  chat.messages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = m.role === "user" ? "userMsg" : "botMsg";
+    div.innerText = m.text;
+    box.appendChild(div);
+  });
+
+  box.scrollTop = box.scrollHeight;
+}
+
+// ---------------- CHAT LIST ----------------
+function renderChatList() {
+  const list = document.getElementById("chatList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  chats.forEach(chat => {
+    const div = document.createElement("div");
+    div.className = "chatItem";
+
+    div.innerText = "Chat " + new Date(chat.id).toLocaleTimeString();
+
+    div.onclick = () => {
+      currentChat = chat.id;
+      renderChat();
     };
 
     list.appendChild(div);
   });
-}function generateAIResponse(text) {
-  text = text.toLowerCase();
+}
 
-  if (text.includes("hello") || text.includes("hi")) {
-    return "Hello 👋 I'm SNIPPIT AI. How can I help you today?";
+// ---------------- BUTTON CONNECT ----------------
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("sendBtn");
+  if (btn) {
+    btn.addEventListener("click", sendMessage);
   }
+});
 
-  if (text.includes("name")) {
-    return "I'm SNIPPIT AI, your personal assistant.";
-  }
+// ---------------- TYPING ----------------
+function showTyping() {
+  const box = document.getElementById("chatBox");
 
-  if (text.includes("how are you")) {
-    return "I'm doing great! Ready to help you build amazing things 🚀";
-  }
-
-  if (text.includes("what is snippit")) {
-    return "SNIPPIT AI is your smart assistant for chatting, learning, and building ideas.";
-  }
-
-  return "I understand you. In the next update I will become fully powered AI 🤖";
-}function showTyping() {
-  let box = document.getElementById("chatBox");
-
-  let typing = document.createElement("div");
+  const typing = document.createElement("div");
   typing.id = "typing";
-  typing.classList.add("typing");
+  typing.className = "typing";
   typing.innerText = "SNIPPIT is typing...";
 
   box.appendChild(typing);
@@ -114,6 +145,21 @@ fetch("http://localhost:3000/chat", {
 }
 
 function hideTyping() {
-  let typing = document.getElementById("typing");
+  const typing = document.getElementById("typing");
   if (typing) typing.remove();
+}
+
+// ---------------- OPTIONAL AI FALLBACK ----------------
+function generateAIResponse(text) {
+  text = text.toLowerCase();
+
+  if (text.includes("hello") || text.includes("hi")) {
+    return "Hello 👋 I'm SNIPPIT AI";
+  }
+
+  if (text.includes("name")) {
+    return "I'm SNIPPIT AI";
+  }
+
+  return "Working on smarter responses...";
 }
