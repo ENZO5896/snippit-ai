@@ -74,18 +74,26 @@ function addMsg(text,type){
     chat.scrollTop=chat.scrollHeight;
 }
 
-function send(){
-    const input=document.getElementById("text");
-    const msg=input.value.trim();
+async function send() {
+  const input = document.getElementById("text");
+  const msg = input.value.trim();
+  if (!msg) return;
 
-    if(!msg) return;
+  addMsg(msg, "user");
+  input.value = "";
 
-    addMsg(msg,"user");
-    input.value="";
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message: msg })
+  });
 
-    setTimeout(()=>{
-        addMsg("AI not connected yet.","ai");
-    },300);
+  const data = await res.json();
+
+  addMsg(data.reply || "Error", "ai");
+}
 }
 
 sendBtn.addEventListener("click",send);

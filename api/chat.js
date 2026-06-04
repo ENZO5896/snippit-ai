@@ -1,9 +1,18 @@
 export default async function handler(req, res) {
   try {
-    const { message } = req.body;
+    // IMPORTANT: ensure JSON is parsed safely
+    let body = req.body;
+
+    if (typeof body === "string") {
+      body = JSON.parse(body);
+    }
+
+    const message = body?.message;
 
     if (!message) {
-      return res.status(400).json({ error: "No message provided" });
+      return res.status(400).json({
+        error: "No message received from frontend"
+      });
     }
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -23,14 +32,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      return res.status(500).json({
-        error: data
-      });
-    }
-
     return res.status(200).json({
-      reply: data.choices?.[0]?.message?.content
+      reply: data.choices?.[0]?.message?.content || "No response"
     });
 
   } catch (err) {
