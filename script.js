@@ -1,61 +1,17 @@
-console.log("SCRIPT IS LOADED ✅");
+let input = document.getElementById("text");
+let sendBtn = document.getElementById("sendBtn");
+let chatBox = document.getElementById("chatBox");
 
-let user = {};
-let chats = [];
-let currentChat = null;
+sendBtn.addEventListener("click", sendMessage);
 
-// ---------------- LOGIN ----------------
-function login() {
-  const name = document.getElementById("name").value;
-  const age = document.getElementById("age").value;
-
-  if (!name || !age) {
-    alert("Fill name and age");
-    return;
-  }
-
-  user = { name, age };
-
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").classList.remove("hidden");
-
-  createNewChat();
-}
-
-// ---------------- CREATE CHAT ----------------
-function createNewChat() {
-  const chat = {
-    id: Date.now(),
-    messages: [],
-    pinned: false
-  };
-
-  chats.push(chat);
-  currentChat = chat.id;
-
-  renderChatList();
-  renderChat();
-}
-
-// ---------------- SEND MESSAGE ----------------
 function sendMessage() {
-  console.log("SEND CLICKED ✅");
-
-  const input = document.getElementById("text");
-  const message = input.value.trim();
-
+  let message = input.value;
   if (!message) return;
 
-  const chat = chats.find(c => c.id === currentChat);
-  if (!chat) return;
-
-  chat.messages.push({
-    role: "user",
-    text: message
-  });
+  // show user message
+  addMessage(message, "user");
 
   input.value = "";
-  renderChat();
 
   showTyping();
 
@@ -71,89 +27,31 @@ function sendMessage() {
     .then(res => res.json())
     .then(data => {
       hideTyping();
-
-      chat.messages.push({
-        role: "bot",
-        text: data.reply
-      });
-
-      renderChat();
-      renderChatList();
+      addMessage(data.reply, "bot");
     })
-    .catch(err => {
+    .catch(() => {
       hideTyping();
-      console.error("ERROR:", err);
+      addMessage("Error getting response", "bot");
     });
 }
 
-// ---------------- RENDER CHAT ----------------
-function renderChat() {
-  const box = document.getElementById("chatBox");
-  if (!box) return;
-
-  box.innerHTML = "";
-
-  const chat = chats.find(c => c.id === currentChat);
-  if (!chat) return;
-
-  chat.messages.forEach(m => {
-    const div = document.createElement("div");
-    div.className = m.role === "user" ? "userMsg" : "botMsg";
-    div.innerText = m.text;
-    box.appendChild(div);
-  });
-
-  box.scrollTop = box.scrollHeight;
+function addMessage(text, type) {
+  let div = document.createElement("div");
+  div.className = `message ${type}`;
+  div.innerText = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// ---------------- CHAT LIST ----------------
-function renderChatList() {
-  const list = document.getElementById("chatList");
-  if (!list) return;
-
-  list.innerHTML = "";
-
-  chats.forEach(chat => {
-    const div = document.createElement("div");
-    div.className = "chatItem";
-    div.innerText = "Chat " + new Date(chat.id).toLocaleTimeString();
-
-    div.onclick = () => {
-      currentChat = chat.id;
-      renderChat();
-    };
-
-    list.appendChild(div);
-  });
-}
-
-// ---------------- BUTTON FIX (IMPORTANT) ----------------
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("sendBtn");
-
-  if (!btn) {
-    console.log("SEND BUTTON NOT FOUND ❌");
-    return;
-  }
-
-  btn.addEventListener("click", sendMessage);
-  console.log("SEND BUTTON CONNECTED ✅");
-});
-
-// ---------------- TYPING ----------------
 function showTyping() {
-  const box = document.getElementById("chatBox");
-
-  const typing = document.createElement("div");
+  let typing = document.createElement("div");
   typing.id = "typing";
-  typing.className = "typing";
+  typing.className = "message bot";
   typing.innerText = "SNIPPIT is typing...";
-
-  box.appendChild(typing);
-  box.scrollTop = box.scrollHeight;
+  chatBox.appendChild(typing);
 }
 
 function hideTyping() {
-  const typing = document.getElementById("typing");
+  let typing = document.getElementById("typing");
   if (typing) typing.remove();
 }
