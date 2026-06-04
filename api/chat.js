@@ -1,18 +1,9 @@
 export default async function handler(req, res) {
   try {
-    // IMPORTANT: ensure JSON is parsed safely
-    let body = req.body;
-
-    if (typeof body === "string") {
-      body = JSON.parse(body);
-    }
-
-    const message = body?.message;
+    const { message } = req.body;
 
     if (!message) {
-      return res.status(400).json({
-        error: "No message received from frontend"
-      });
+      return res.status(400).json({ error: "No message received" });
     }
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
