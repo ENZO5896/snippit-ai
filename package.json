@@ -1,6 +1,29 @@
 {
   "dependencies": {
     "@ai-sdk/openai": "^3.0.68",
-    "ai": "^6.0.197"
-  }
+    "ai": "^6.0.197",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^6.42.0"
+  },
+  "name": "snippit-ai",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ENZO5896/snippit-ai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ENZO5896/snippit-ai/issues"
+  },
+  "homepage": "https://github.com/ENZO5896/snippit-ai#readme"
 }
