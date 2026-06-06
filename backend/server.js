@@ -7,23 +7,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// HEALTH CHECK
+// TEST ROUTE
 app.get("/", (req, res) => {
   res.send("SNIPPIT-AI backend is running 🚀");
 });
 
-// AI ROUTE (TEMP SAFE VERSION - NO CRASH)
-app.post("/api/chat", async (req, res) => {
+// CHAT ROUTE (SAFE VERSION)
+app.post("/api/chat", (req, res) => {
   try {
     const { message } = req.body;
 
     if (!message) {
-      return res.status(400).json({ error: "Message required" });
+      return res.status(400).json({ error: "No message provided" });
     }
 
-    // TEMP RESPONSE (prevents crash while fixing deploy)
     res.json({
-      reply: "AI backend is running. OpenAI will be connected after deploy fix."
+      reply: "Backend is working. AI will be reconnected after deploy fix."
     });
 
   } catch (err) {
