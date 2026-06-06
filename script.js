@@ -26,7 +26,7 @@ function showLogin() {
 }
 
 
-// ================= AUTH STATE (SECURITY + ANALYTICS SAFE) =================
+// ================= AUTH STATE =================
 auth.onAuthStateChanged(async (user) => {
   if (user) {
 
@@ -70,7 +70,7 @@ function loginWithGoogle() {
 }
 
 
-// ================= EMAIL LOGIN / SIGNUP =================
+// ================= EMAIL LOGIN =================
 function emailLogin() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -91,30 +91,7 @@ function logout() {
 }
 
 
-// ================= AI BACKEND CONNECTION (NEW FIXED PART) =================
-
-// REAL AI CALL
-async function getAIResponse(message) {
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message })
-    });
-
-    const data = await response.json();
-    return data.reply;
-
-  } catch (error) {
-    console.error("AI backend error:", error);
-    return "AI is currently unavailable.";
-  }
-}
-
-
-// ================= CHAT SYSTEM (FIXED + CONNECTED) =================
+// ================= CHAT SYSTEM (REAL BACKEND CONNECTED) =================
 async function sendMessage() {
   const input = document.getElementById("input");
   const text = input.value;
@@ -122,7 +99,7 @@ async function sendMessage() {
 
   const chatBox = document.getElementById("chatBox");
 
-  // USER MESSAGE UI
+  // show user message
   const userMsg = document.createElement("div");
   userMsg.className = "msg user";
   userMsg.innerText = text;
@@ -130,9 +107,9 @@ async function sendMessage() {
 
   input.value = "";
 
+  // save user message to firestore
   const user = auth.currentUser;
 
-  // SAVE USER MESSAGE (FIRESTORE)
   if (user) {
     db.collection("chats").add({
       uid: user.uid,
@@ -142,24 +119,40 @@ async function sendMessage() {
     });
   }
 
-  // AI LOADING MESSAGE
-  const aiMsg = document.createElement("div");
-  aiMsg.className = "msg ai";
-  aiMsg.innerText = "Thinking...";
-  chatBox.appendChild(aiMsg);
-
-  // CALL REAL BACKEND
-  const reply = await getAIResponse(text);
-
-  aiMsg.innerText = reply;
-
-  // SAVE AI RESPONSE (FIRESTORE)
-  if (user) {
-    db.collection("chats").add({
-      uid: user.uid,
-      role: "ai",
-      message: reply,
-      time: Date.now()
+  try {
+    // ================= CALL YOUR BACKEND =================
+    const res = await fetch("https://snippit-ai-abc123.onrender.com/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: text })
     });
+
+    const data = await res.json();
+
+    // show AI response
+    const aiMsg = document.createElement("div");
+    aiMsg.className = "msg ai";
+    aiMsg.innerText = data.reply;
+    chatBox.appendChild(aiMsg);
+
+    // save AI response
+    if (user) {
+      db.collection("chats").add({
+        uid: user.uid,
+        role: "ai",
+        message: data.reply,
+        time: Date.now()
+      });
+    }
+
+  } catch (error) {
+    console.error("Chat error:", error);
+
+    const errMsg = document.createElement("div");
+    errMsg.className = "msg ai";
+    errMsg.innerText = "Error connecting to AI backend";
+    chatBox.appendChild(errMsg);
   }
 }
