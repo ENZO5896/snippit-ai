@@ -1,57 +1,25 @@
-let input = document.getElementById("text");
-let sendBtn = document.getElementById("sendBtn");
-let chatBox = document.getElementById("chatBox");
-
-sendBtn.addEventListener("click", sendMessage);
-
 function sendMessage() {
-  let message = input.value;
-  if (!message) return;
+  const input = document.getElementById("input");
+  const chatBox = document.getElementById("chatBox");
 
-  // show user message
-  addMessage(message, "user");
+  const text = input.value;
+  if (!text) return;
+
+  // USER MESSAGE
+  const userMsg = document.createElement("div");
+  userMsg.classList.add("msg", "user");
+  userMsg.innerText = text;
+  chatBox.appendChild(userMsg);
 
   input.value = "";
 
-  showTyping();
+  // AI RESPONSE (fake for now)
+  setTimeout(() => {
+    const aiMsg = document.createElement("div");
+    aiMsg.classList.add("msg", "ai");
+    aiMsg.innerText = "SNIPPIT-AI is thinking... (backend not connected yet)";
+    chatBox.appendChild(aiMsg);
 
-  fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: message
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      hideTyping();
-      addMessage(data.reply, "bot");
-    })
-    .catch(() => {
-      hideTyping();
-      addMessage("Error getting response", "bot");
-    });
-}
-
-function addMessage(text, type) {
-  let div = document.createElement("div");
-  div.className = `message ${type}`;
-  div.innerText = text;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function showTyping() {
-  let typing = document.createElement("div");
-  typing.id = "typing";
-  typing.className = "message bot";
-  typing.innerText = "SNIPPIT is typing...";
-  chatBox.appendChild(typing);
-}
-
-function hideTyping() {
-  let typing = document.getElementById("typing");
-  if (typing) typing.remove();
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }, 600);
 }
