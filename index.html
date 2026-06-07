@@ -165,7 +165,11 @@ function emailLogin() {
 
   auth.signInWithEmailAndPassword(email, password)
     .then(() => showApp())
-    .catch(err => alert(err.message));
+    .catch(err => {
+      alert(err.message);
+      console.log(err);
+    });
+}
 }
 
 /* LOGOUT */
