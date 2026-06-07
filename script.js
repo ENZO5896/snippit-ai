@@ -27,10 +27,20 @@ function emailLogin() {
   const password = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, password)
-    .then(user => {
-      console.log("Email login success:", user.user.email);
+    .then(() => {
+      console.log("Login success");
     })
-    .catch(err => alert(err.message));
+    .catch(error => {
+      console.log("Login failed, trying signup...", error.message);
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+          console.log("Account created + logged in");
+        })
+        .catch(err => {
+          alert(err.message);
+        });
+    });
 }
 
 function logout() {
