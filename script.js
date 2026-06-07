@@ -14,7 +14,12 @@ const auth = firebase.auth();
 /* ================= LOGIN ================= */
 function loginWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(console.error);
+
+  auth.signInWithPopup(provider)
+    .then(user => {
+      console.log("Google login success:", user.user.email);
+    })
+    .catch(err => alert(err.message));
 }
 
 function emailLogin() {
@@ -22,6 +27,9 @@ function emailLogin() {
   const password = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, password)
+    .then(user => {
+      console.log("Email login success:", user.user.email);
+    })
     .catch(err => alert(err.message));
 }
 
@@ -37,7 +45,6 @@ async function sendMessage() {
 
   const chatBox = document.getElementById("chatBox");
 
-  // user message
   const userMsg = document.createElement("div");
   userMsg.className = "msg user";
   userMsg.innerText = text;
@@ -46,7 +53,7 @@ async function sendMessage() {
   input.value = "";
 
   try {
-    const res = await fetch("https://snippit-ai-a005.onrender.com", {
+    const res = await fetch("https://YOUR-RENDER-URL.onrender.com/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: text })
@@ -64,7 +71,7 @@ async function sendMessage() {
 
     const aiMsg = document.createElement("div");
     aiMsg.className = "msg ai";
-    aiMsg.innerText = "Error connecting to SNIPPIT backend";
+    aiMsg.innerText = "Backend not connected";
     chatBox.appendChild(aiMsg);
   }
 }
