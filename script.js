@@ -18,6 +18,7 @@ function loginWithGoogle() {
   auth.signInWithPopup(provider)
     .then(user => {
       console.log("Google login success:", user.user.email);
+      if (typeof showApp === "function") showApp();
     })
     .catch(err => alert(err.message));
 }
@@ -29,17 +30,26 @@ function emailLogin() {
   auth.signInWithEmailAndPassword(email, password)
     .then(() => {
       console.log("Login success");
+      if (typeof showApp === "function") showApp();
     })
     .catch(error => {
-      console.log("Login failed, trying signup...", error.message);
+      alert(error.message);
+      console.error("Login failed:", error);
+    });
+}
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          console.log("Account created + logged in");
-        })
-        .catch(err => {
-          alert(err.message);
-        });
+function registerWithEmail() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      console.log("Account created + logged in");
+      if (typeof showApp === "function") showApp();
+    })
+    .catch(error => {
+      alert(error.message);
+      console.error("Registration failed:", error);
     });
 }
 

@@ -101,6 +101,8 @@
 
   <button onclick="loginWithGoogle()">Continue with Google</button>
   <button onclick="emailLogin()">Login with Email</button>
+  <button onclick="registerWithEmail()">Register with Email</button>
+  <p style="color: #ccc; margin-top: 10px; max-width: 260px; text-align: center;">Already registered? Click Login. New users can click Register.</p>
 </div>
 
 <div id="app">
@@ -155,7 +157,12 @@ auth.onAuthStateChanged(user => {
 /* GOOGLE LOGIN */
 function loginWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(console.error);
+  auth.signInWithPopup(provider)
+    .then(() => showApp())
+    .catch(err => {
+      alert(err.message);
+      console.error(err);
+    });
 }
 
 /* EMAIL LOGIN */
@@ -166,8 +173,14 @@ function emailLogin() {
   auth.signInWithEmailAndPassword(email, password)
     .then(() => showApp())
     .catch(err => {
-      alert(err.message);
-      console.log(err);
+      if (err.code === "auth/user-not-found") {
+        auth.createUserWithEmailAndPassword(email, password)
+          .then(() => showApp())
+          .catch(createErr => alert(createErr.message));
+      } else {
+        alert(err.message);
+        console.error(err);
+      }
     });
 }
 
