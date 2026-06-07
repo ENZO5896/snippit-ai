@@ -73,11 +73,11 @@ async function sendMessage() {
   input.value = "";
 
   try {
-    const res = await fetch("https://snippit-ai-a005.onrender.com/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
+    fetch("https://snippit-ai-a005.onrender.com/api/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ message: text })
+})
 
     const data = await res.json();
 
