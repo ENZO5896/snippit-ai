@@ -2,250 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SNIPPIT-AI</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0f0f0f;
-      color: white;
-    }
-
-    /* TOPBAR */
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      background: #1a1a1a;
-      align-items: center;
-    }
-
-    /* APP LAYOUT */
-    #app {
-      display: flex;
-      height: 100vh;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 200px;
-      background: #111;
-      padding: 10px;
-      overflow-y: auto;
-    }
-
-    /* MAIN CHAT */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .chat-box {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-    }
-
-    .input-area {
-      display: flex;
-      padding: 10px;
-      background: #1a1a1a;
-    }
-
-    .input-area input {
-      flex: 1;
-      padding: 10px;
-    }
-
-    .input-area button {
-      padding: 10px;
-    }
-
-    .msg {
-      margin: 8px;
-      padding: 10px;
-      border-radius: 8px;
-      max-width: 70%;
-    }
-
-    .user {
-      background: #4a90e2;
-      margin-left: auto;
-    }
-
-    .ai {
-      background: #2a2a2a;
-    }
-
-    /* LIGHT MODE */
-    .light-mode {
-      background: white;
-      color: black;
-    }
-
-    .light-mode .topbar,
-    .light-mode .input-area {
-      background: #eee;
-    }
-
-    .light-mode .sidebar {
-      background: #f5f5f5;
-    }
-  </style>
-
-  <!-- Firebase -->
+  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
-
 <body>
-
-<!-- LOGIN -->
-<div id="loginPage" style="text-align:center; padding:50px;">
-  <h1>SNIPPIT-AI</h1>
-
-  <input id="email" placeholder="Email" /><br><br>
-  <input id="password" type="password" placeholder="Password" /><br><br>
-
-  <button onclick="loginWithGoogle()">Continue with Google</button>
-  <button onclick="emailLogin()">Login with Email</button>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none;">
-
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <h3>Chats</h3>
-    <div id="chatHistory"></div>
-  </div>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <div class="topbar">
-      <div>
-        <h3>SNIPPIT-AI</h3>
-        <span id="userDisplay"></span>
+  <div id="loginPage" class="login-page">
+    <div class="login-panel">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <h1>SNIPPIT-AI</h1>
+          <p>Modern AI chat with file upload, document edits, and premium access.</p>
+        </div>
       </div>
-
-      <div>
-        <button onclick="toggleTheme()">🌙/☀️</button>
-        <button onclick="logout()">Logout</button>
+      <div class="field-group">
+        <input id="email" type="email" placeholder="Email address" autocomplete="username" />
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
+      </div>
+      <div class="auth-actions">
+        <button class="button primary" onclick="loginWithGoogle()">Continue with Google</button>
+        <button class="button secondary" onclick="emailLogin()">Login with Email</button>
+        <button class="button outline" onclick="registerWithEmail()">Create Account</button>
       </div>
     </div>
-
-    <div id="chatBox" class="chat-box"></div>
-
-    <div class="input-area">
-      <input id="input" placeholder="Ask SNIPPIT-AI..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-
   </div>
-</div>
-
-<script>
-/* ================= FIREBASE ================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyDpIjP2oq2SpU-2pvtLjBkFB6-KzEl9NnI",
-  authDomain: "snippit-ai.firebaseapp.com",
-  projectId: "snippit-ai",
-  storageBucket: "snippit-ai.firebasestorage.app",
-  messagingSenderId: "143652560651",
-  appId: "1:143652560651:web:2f479355701b8fd48ecc0e"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-/* ================= UI CONTROL ================= */
-function showApp() {
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("app").style.display = "flex";
-}
-
-function showLogin() {
-  document.getElementById("loginPage").style.display = "block";
-  document.getElementById("app").style.display = "none";
-}
-
-/* ================= AUTH ================= */
-auth.onAuthStateChanged(user => {
-  if (user) {
-    showApp();
-    document.getElementById("userDisplay").innerText =
-      user.displayName || user.email;
-  } else {
-    showLogin();
-  }
-});
-
-function loginWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-
-  auth.signInWithPopup(provider)
-    .catch(err => alert(err.message));
-}
-
-function emailLogin() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  auth.signInWithEmailAndPassword(email, password)
-    .catch(err => alert(err.message));
-}
-
-function logout() {
-  auth.signOut();
-}
-
-/* ================= THEME ================= */
-function toggleTheme() {
-  document.body.classList.toggle("light-mode");
-}
-
-/* ================= CHAT ================= */
-async function sendMessage() {
-  const input = document.getElementById("input");
-  const text = input.value;
-  if (!text) return;
-
-  const chatBox = document.getElementById("chatBox");
-
-  const userMsg = document.createElement("div");
-  userMsg.className = "msg user";
-  userMsg.innerText = text;
-  chatBox.appendChild(userMsg);
-
-  input.value = "";
-
-  const aiMsg = document.createElement("div");
-  aiMsg.className = "msg ai";
-  aiMsg.innerText = "typing...";
-  chatBox.appendChild(aiMsg);
-
-  try {
-    const res = await fetch("https://snippit-ai-a005.onrender.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
-
-    const data = await res.json();
-
-    setTimeout(() => {
-      aiMsg.innerText = data.reply;
-    }, 800);
-
-  } catch (err) {
-    aiMsg.innerText = "Backend error";
-  }
-}
-</script>
-
+  <div id="app" class="app" style="display:none;">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div>
+          <p class="sidebar-label">AI Workspace</p>
+          <h2>Snippit</h2>
+        </div>
+      </div>
+      <button class="button outline full" onclick="createNewChat()">+ New chat</button>
+      <div class="panel">
+        <div class="panel-title">Conversations</div>
+        <div id="chatHistory" class="chat-history"></div>
+      </div>
+      <div class="panel compact">
+        <div class="panel-title">Shortcuts</div>
+        <button class="button ghost full" onclick="clearConversation()">Clear chat</button>
+        <button class="button ghost full" onclick="loadUploads()">Refresh uploads</button>
+        <button class="button ghost full" onclick="toggleTheme()">Toggle theme</button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="page-title">
+            <h1 id="chatTitle">Welcome to SNIPPIT-AI</h1>
+            <p id="subtitle">Ask questions, upload files, and request document edits.</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div id="premiumBadge" class="premium-badge status-badge">Standard Plan</div>
+          <div id="userChip" class="user-chip">Guest</div>
+          <button class="button outline small" onclick="logout()">Logout</button>
+        </div>
+      </header>
+      <section class="chat-section">
+        <div id="chatBox" class="chat-box"></div>
+        <form id="composer" class="composer" onsubmit="event.preventDefault(); sendMessage();">
+          <textarea id="input" placeholder="Type a message..." rows="3"></textarea>
+          <div class="composer-actions">
+            <button type="button" class="button secondary" onclick="uploadFile()">Attach file</button>
+            <button type="submit" class="button primary">Send</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <aside class="right-panel">
+      <div class="panel">
+        <div class="panel-title">Premium access</div>
+        <p class="panel-copy">Unlock uploads, document editing, and advanced AI responses.</p>
+        <div class="status-row">
+          <span id="premiumStatus" class="status-badge">Loading status...</span>
+        </div>
+        <div class="usage-summary">
+          <p id="imageQuota" class="panel-copy">Images: 0 / 3</p>
+          <p id="fileQuota" class="panel-copy">Files: 0 / 3</p>
+        </div>
+        <button class="button primary full" onclick="startCheckout()">Buy Premium</button>
+        <div class="gift-card">
+          <input id="giftCodeInput" placeholder="Gift code" />
+          <button class="button secondary full" onclick="redeemGiftCode()">Redeem</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Uploads & edits</div>
+        <p class="panel-copy">Standard users can upload up to 3 images and 3 files per day. Premium users can upload up to 6 of each.</p>
+        <label class="file-picker">
+          <span>Select file</span>
+          <input type="file" id="fileInput" />
+        </label>
+        <button class="button secondary full" onclick="uploadFile()">Upload selected file</button>
+        <div id="uploadsList" class="uploads-list"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Document edit</div>
+        <select id="fileSelect">
+          <option value="">Select file to edit</option>
+        </select>
+        <textarea id="editInstruction" placeholder="Describe your edit request..." rows="4"></textarea>
+        <button class="button primary full" onclick="requestEdit()">Request edit</button>
+        <p id="editNote" class="panel-copy">Editing is available for premium users only.</p>
+      </div>
+    </aside>
+  </div>
+  <script src="script.js" defer></script>
 </body>
 </html>
