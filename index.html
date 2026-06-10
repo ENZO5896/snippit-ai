@@ -47,7 +47,16 @@
         <div class="panel-title">Shortcuts</div>
         <button class="button ghost full" onclick="clearConversation()">Clear chat</button>
         <button class="button ghost full" onclick="loadUploads()">Refresh uploads</button>
-        <button class="button ghost full" onclick="toggleTheme()">Toggle theme</button>
+        <div style="position: relative;">
+          <button class="button ghost full" onclick="toggleThemeMenu()">Toggle theme</button>
+          <div id="themeMenu" class="theme-menu" style="display: none;">
+            <button onclick="setTheme('dark')">Dark</button>
+            <button onclick="setTheme('light')">Light</button>
+            <button onclick="setTheme('blue')">Blue</button>
+            <button onclick="setTheme('green')">Green</button>
+            <button onclick="setTheme('purple')">Purple</button>
+          </div>
+        </div>
       </div>
     </aside>
     <main class="main">
@@ -76,6 +85,14 @@
       </section>
     </main>
     <aside class="right-panel">
+      <div class="panel">
+        <div class="panel-title">Profile</div>
+        <div class="profile-section">
+          <input id="userNameInput" placeholder="Your name" maxlength="30" />
+          <p class="panel-copy" style="margin-top: 12px;">Current theme: <span id="themeDisplay">Dark</span></p>
+          <button class="button secondary full" onclick="saveProfile()">Save profile</button>
+        </div>
+      </div>
       <div class="panel">
         <div class="panel-title">Premium access</div>
         <p class="panel-copy">Unlock uploads, document editing, and advanced AI responses.</p>

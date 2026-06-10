@@ -21,6 +21,8 @@ let activeChatId = null;
 let currentPremium = false;
 let currentUsage = { imageUploads: 0, fileUploads: 0 };
 let currentLimits = { imageLimit: 3, fileLimit: 3 };
+let currentTheme = localStorage.getItem('snippitTheme') || 'dark';
+let currentUserName = localStorage.getItem('snippitUserName') || 'there';
 
 function showLogin() {
   document.getElementById('loginPage').style.display = 'flex';
@@ -30,10 +32,12 @@ function showLogin() {
 function showApp() {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('app').style.display = 'grid';
+  applyTheme(currentTheme);
   renderChatList();
   loadPremiumStatus();
   loadUploads();
   updateUserChip();
+  loadProfile();
 }
 
 function updateUserChip() {
@@ -57,6 +61,13 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+/* Apply saved theme on page load */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => applyTheme(currentTheme));
+} else {
+  applyTheme(currentTheme);
+}
+
 function loginWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(err => alert(err.message));
@@ -78,6 +89,56 @@ function registerWithEmail() {
 
 function logout() {
   auth.signOut();
+}
+
+function applyTheme(theme) {
+  document.body.className = '';
+  const root = document.documentElement;
+  if (theme === 'dark') {
+    document.body.classList.add('dark-mode');
+  } else if (theme === 'light') {
+    document.body.classList.add('light-mode');
+  } else if (theme === 'blue') {
+    document.body.classList.add('blue-mode');
+  } else if (theme === 'green') {
+    document.body.classList.add('green-mode');
+  } else if (theme === 'purple') {
+    document.body.classList.add('purple-mode');
+  }
+  currentTheme = theme;
+  localStorage.setItem('snippitTheme', theme);
+}
+
+function toggleThemeMenu() {
+  const menu = document.getElementById('themeMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  const themeDisplay = document.getElementById('themeDisplay');
+  if (themeDisplay) themeDisplay.innerText = theme.charAt(0).toUpperCase() + theme.slice(1);
+  document.getElementById('themeMenu').style.display = 'none';
+}
+
+function loadProfile() {
+  const nameInput = document.getElementById('userNameInput');
+  if (nameInput) {
+    nameInput.value = currentUserName;
+  }
+  const themeDisplay = document.getElementById('themeDisplay');
+  if (themeDisplay) themeDisplay.innerText = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+}
+
+function saveProfile() {
+  const nameInput = document.getElementById('userNameInput');
+  if (nameInput && nameInput.value.trim()) {
+    currentUserName = nameInput.value.trim();
+    localStorage.setItem('snippitUserName', currentUserName);
+    alert('Profile saved!');
+  } else {
+    alert('Please enter a name');
+  }
 }
 
 function createNewChat() {
@@ -161,10 +222,16 @@ async function sendMessage() {
   chat.messages.push(typingMessage);
   renderActiveChat();
   try {
+    const greetingTexts = ['hi', 'hello', 'hey', 'sup', 'yo', 'howdy', 'hola'];
+    const isGreeting = greetingTexts.some(g => text.toLowerCase().includes(g));
+    let messageToSend = text;
+    if (isGreeting && chat.messages.length <= 1) {
+      messageToSend = text + ` My name is ${currentUserName}.`;
+    }
     const res = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ message: messageToSend }),
     });
     const data = await res.json();
     typingMessage.text = data.reply || 'No response from AI.';
