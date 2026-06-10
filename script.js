@@ -222,16 +222,10 @@ async function sendMessage() {
   chat.messages.push(typingMessage);
   renderActiveChat();
   try {
-    const greetingTexts = ['hi', 'hello', 'hey', 'sup', 'yo', 'howdy', 'hola'];
-    const isGreeting = greetingTexts.some(g => text.toLowerCase().includes(g));
-    let messageToSend = text;
-    if (isGreeting && chat.messages.length <= 1) {
-      messageToSend = text + ` My name is ${currentUserName}.`;
-    }
     const res = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: messageToSend }),
+      body: JSON.stringify({ message: text, userName: currentUserName }),
     });
     const data = await res.json();
     typingMessage.text = data.reply || 'No response from AI.';

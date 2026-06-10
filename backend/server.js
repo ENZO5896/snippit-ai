@@ -111,7 +111,7 @@ app.get("/", (req, res) => {
 /* ================= CHAT API ================= */
 app.post("/api/chat", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, userName } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
@@ -121,13 +121,19 @@ app.post("/api/chat", async (req, res) => {
       return res.status(500).json({ error: 'OpenAI API key is not configured' });
     }
 
+    const isGreeting = ['hi', 'hello', 'hey', 'sup', 'yo', 'howdy', 'hola'].some(g => message.toLowerCase().includes(g));
+    const systemPrompt = isGreeting && userName
+      ? `You are SNIPPIT-AI, a smart assistant for students and entrepreneurs in Africa. When greeting ${userName}, respond with 'Hello ${userName}, how can I assist you today?' or similar. Answer directly, briefly, and clearly. Do not write long explanations.`
+      : "You are SNIPPIT-AI, a smart assistant for students and entrepreneurs in Africa. Answer directly, briefly, and clearly. Do not write long explanations.";
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
+      temperature: 0.2,
+      max_tokens: 250,
       messages: [
         {
           role: "system",
-          content:
-            "You are SNIPPIT-AI, a smart assistant for students and entrepreneurs in Africa. Keep answers clear and helpful."
+          content: systemPrompt
         },
         {
           role: "user",
