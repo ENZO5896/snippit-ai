@@ -14,5 +14,5 @@ Match the user's tone.
 `,
   });
 
-  return result.toDataStreamResponse();
+  return result.toTextStreamResponse();
 }
