@@ -1,8 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rootDirectory": "snippit-ai",
-  "framework": "nextjs",
-  "installCommand": "cd snippit-ai && npm ci",
-  "buildCommand": "cd snippit-ai && npm run build",
-  "devCommand": "cd snippit-ai && npm run dev"
+  "framework": "nextjs"
 }
